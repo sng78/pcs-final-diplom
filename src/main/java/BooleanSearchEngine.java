@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class BooleanSearchEngine implements SearchEngine {
-    Map<String, List<PageEntry>> indexing; //мапа индексации поиска
+    protected Map<String, List<PageEntry>> indexing; //мапа индексации поиска
 
     public BooleanSearchEngine(File pdfsDir) throws IOException {
         // прочтите тут все pdf и сохраните нужные данные,
@@ -57,6 +57,10 @@ public class BooleanSearchEngine implements SearchEngine {
                     pageEntries.add(new PageEntry(file.getName(), i, value));
                     indexing.put(key, pageEntries); //заполняем индекс
                 }
+
+                for (var entry : indexing.entrySet()) {
+                    Collections.sort(entry.getValue()); //сортируем список поиска
+                }
             }
         }
     }
@@ -64,15 +68,14 @@ public class BooleanSearchEngine implements SearchEngine {
     @Override
     public List<PageEntry> search(String word) {
         // реализация поиска по слову
+        List<PageEntry> list = indexing.get(word.toLowerCase());
 
-        for (Map.Entry<String, List<PageEntry>> entry : indexing.entrySet()) {
-            String key = entry.getKey();
-            if (key.equals(word)) {
-                List<PageEntry> list = entry.getValue();
-                Collections.sort(list); //сортируем список поиска в порядке уменьшения поля count
-                return list;
-            }
+/* полный вариант ретурна который ниже
+        if (list != null) {
+            return list;
         }
         return Collections.emptyList();
+*/
+        return Objects.requireNonNullElse(list, Collections.emptyList());
     }
 }
